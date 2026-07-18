@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar for Cinematic Theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #08080A;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f1f26;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00ffd1;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(18, 18, 22, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-accent {
+  background: rgba(251, 191, 36, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(251, 191, 36, 0.1);
+}
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+}
+
+.glow-teal {
+  box-shadow: 0 0 15px rgba(0, 255, 209, 0.2);
+}
+
+/* Code Syntax Highlight overrides */
+.code-highlight-line {
+  background: rgba(0, 255, 209, 0.1);
+  border-left: 2px solid #00ffd1;
+}
