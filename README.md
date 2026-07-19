@@ -71,21 +71,3 @@ To install all dependencies across the monorepo workspaces and spin up both the 
 
 ---
 
-## 🎓 Evaluator Viva Q&A Guide
-
-Here are 5 standard Viva Voce questions examiners ask during project defenses:
-
-1. **Q: How does the Concurrency Sandbox demonstrate the difference between Mutex and Semaphore?**
-   - **A:** The *Mutex* is a mutual exclusion lock (capacity = 1) that serializes seat checkout requests. When 5 requests arrive concurrently, only 1 acquires the lock, validates availability, books the seat, and releases it. The other 4 read that the seat is now booked and fail. The *Semaphore* controls connection slots (capacity = 2). It allows 2 checkouts to proceed simultaneously, queueing the rest, but without a Mutex inside those slots, the 2 active checkouts still race against each other, demonstrating that Semaphore controls throughput limits while Mutex controls atomic resource locks.
-
-2. **Q: Why does A* Search explore fewer nodes than Dijkstra to find the nearest theatre?**
-   - **A:** Dijkstra explores in all directions blindly, relaxing edges based on path cost $g(n)$ alone. A* leverages an admissible heuristic $h(n)$ (Euclidean coordinate distance to destination). It prioritizes node evaluation based on $f(n) = g(n) + h(n)$, pruning nodes in directions opposite to the destination theatre.
-
-3. **Q: How do you achieve step-by-step backward and forward execution in the visualizer?**
-   - **A:** All algorithms are implemented using ES6 **generator functions** (`function*`). The generator yields state snapshot objects (variables, heaps, visited lists) at critical breakpoints. The `AlgorithmPlayer` steps forward by calling `.next()`, caching every yielded step in an array. To step backward, it retrieves the previous snapshot from the cached array history, avoiding re-running the generator.
-
-4. **Q: How is the Undo Seat Selection stack designed?**
-   - **A:** As users click available seats, the coordinates are pushed to our custom `UndoSeatSelection` stack. Clicking the Undo button pops the last coordinate from the stack, allowing constant-time $O(1)$ selection history reversal.
-
-5. **Q: What is the purpose of the Custom Hash Map in ticket verification?**
-   - **A:** Real-world validation gates must verify booking confirmation IDs instantly. Rather than running linear scans or database lookups, the gate verification queries a custom `BookingHashMap` index. Keys are hashed, mapped to buckets, and searched in $O(1)$ average time, resolving collisions via chaining.
