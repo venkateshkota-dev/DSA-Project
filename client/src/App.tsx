@@ -9,7 +9,6 @@ import SeatingGrid from './pages/SeatingGrid';
 import CheckoutSimulation from './pages/CheckoutSimulation';
 import Confirmation from './pages/Confirmation';
 import Dashboard from './pages/Dashboard';
-import Comparison from './pages/Comparison';
 import { Movie, Theatre, Showtime, Booking } from '../../server/src/db/types';
 
 type Page =
@@ -21,8 +20,7 @@ type Page =
   | 'seating'
   | 'checkout'
   | 'confirmation'
-  | 'dashboard'
-  | 'comparison';
+  | 'dashboard';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
@@ -152,7 +150,6 @@ export default function App() {
         )}
 
         {currentPage === 'dashboard' && <Dashboard />}
-        {currentPage === 'comparison' && <Comparison />}
       </main>
     </div>
   );

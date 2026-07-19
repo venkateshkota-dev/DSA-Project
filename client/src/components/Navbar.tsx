@@ -48,17 +48,6 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
           DSA Dashboard
         </button>
 
-        <button
-          onClick={() => onNavigate('comparison')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
-            currentPage === 'comparison'
-              ? 'bg-purple-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-purple-400 hover:bg-white/5'
-          }`}
-        >
-          <BarChart3 className="w-4 h-4" />
-          Benchmarks
-        </button>
       </nav>
     </header>
   );
