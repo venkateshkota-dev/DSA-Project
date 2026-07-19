@@ -3,7 +3,6 @@ import { ArrowLeft, MapPin, Navigation, Star, Clock, Ticket, Check, ChevronDown,
 import { Movie, Theatre, Showtime } from '../../../server/src/db/types';
 import { Graph } from '../../../DSA/Graphs/Graph';
 import { Dijkstra } from '../../../DSA/Graphs/Dijkstra';
-import { AStar } from '../../../DSA/Graphs/AStar';
 import { BinarySearch } from '../../../DSA/Searching/BinarySearch';
 
 interface TheatreSelectionProps {
@@ -89,27 +88,12 @@ export default function TheatreSelection({
           const dPath = dStepVal.value.path;
           const dDist = dStepVal.value.distance;
 
-          // Run A* generator
-          const aStart = performance.now();
-          const aGen = AStar.runGenerator(graph, 'U', theatre._id);
-          let aSteps = 0;
-          let aStepVal = aGen.next();
-          while (!aStepVal.done) {
-            aSteps++;
-            aStepVal = aGen.next();
-          }
-          const aTime = performance.now() - aStart;
-          const aPath = aStepVal.value.path;
-          const aDist = aStepVal.value.distance;
-
           return {
             ...theatre,
             distance: Number(dDist.toFixed(1)),
             path: dPath,
             dijkstraSteps: dSteps,
             dijkstraTimeMs: dTime,
-            aStarSteps: aSteps,
-            aStarTimeMs: aTime,
             rating: metrics.rating,
             type: metrics.type,
             facilities: metrics.facilities,
@@ -250,7 +234,7 @@ export default function TheatreSelection({
               <div className="border border-cinema-border bg-cinema-black/80 rounded-xl p-4.5 space-y-3">
                 <div className="flex justify-between border-b border-cinema-border pb-2">
                   <span className="font-bold text-slate-200">1. Distance Sorting</span>
-                  <span className="text-[10px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded">Dijkstra & A*</span>
+                  <span className="text-[10px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded">Dijkstra</span>
                 </div>
                 <div className="space-y-1.5 text-xs">
                   <div>Algorithm: <span className="text-white font-bold">{algorithmDetails.pathfinding.algorithm}</span></div>
