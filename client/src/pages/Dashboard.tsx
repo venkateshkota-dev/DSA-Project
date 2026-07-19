@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, ChevronRight, ChevronLeft, RotateCcw, Sliders, Code, Info, Sparkles, Terminal } from 'lucide-react';
 import { Graph } from '../../../DSA/Graphs/Graph';
 import { Dijkstra } from '../../../DSA/Graphs/Dijkstra';
-import { AStar } from '../../../DSA/Graphs/AStar';
 import { BinaryTree } from '../../../DSA/Trees/BinaryTree';
 import { BinarySearchTree } from '../../../DSA/Trees/BinarySearchTree';
 import { LinearSearch } from '../../../DSA/Searching/LinearSearch';
@@ -38,23 +37,7 @@ const CODE_SNIPPETS: Record<string, string[]> = {
     "        prev[neighbor] = curr",
     "        pq.enqueue(neighbor, alt)"
   ],
-  astar: [
-    "function AStar(graph, start, target):",
-    "  gScores = fill(Infinity)",
-    "  gScores[start] = 0",
-    "  pq.enqueue(start, h(start))",
-    "  while pq is not empty:",
-    "    curr = pq.dequeue()",
-    "    if curr in visited: continue",
-    "    visited.add(curr)",
-    "    if curr == target: break",
-    "    for neighbor in graph.getNeighbors(curr):",
-    "      tentativeG = gScores[curr] + weight",
-    "      if tentativeG < gScores[neighbor]:",
-    "        gScores[neighbor] = tentativeG",
-    "        fScore = tentativeG + h(neighbor)",
-    "        pq.enqueue(neighbor, fScore)"
-  ],
+
   linearsearch: [
     "function LinearSearch(arr, target):",
     "  for i from 0 to arr.length - 1:",
@@ -213,15 +196,7 @@ const THEORY_METADATA: Record<string, {
     pros: ["Guarantees shortest path.", "Handles arbitrary graph structures."],
     cons: ["Blind expansion (no direction vector).", "Cannot handle negative weights."]
   },
-  astar: {
-    name: "A* Search Algorithm",
-    purpose: "Heuristic-guided path planning.",
-    cinebookUse: "Compares path routes with Dijkstra using distance heuristics.",
-    timeComp: "O(E log V) Avg",
-    spaceComp: "O(V)",
-    pros: ["Highly optimal node pruning.", "Examines fewer nodes than Dijkstra."],
-    cons: ["Heuristic selection determines correctness.", "High memory consumption for big maps."]
-  },
+
   linearsearch: {
     name: "Linear Search",
     purpose: "Sequential list scan lookup.",
@@ -394,19 +369,7 @@ export default function Dashboard() {
         g.addEdge('B', 'D', 14);
         return Dijkstra.runGenerator(g, 'A', 'D');
       }
-      case 'astar': {
-        const g = new Graph();
-        g.addVertex({ id: 'A', name: 'Start', x: 10, y: 25 });
-        g.addVertex({ id: 'B', name: 'Node B', x: 35, y: 15 });
-        g.addVertex({ id: 'C', name: 'Node C', x: 50, y: 40 });
-        g.addVertex({ id: 'D', name: 'End', x: 75, y: 25 });
-        g.addEdge('A', 'B', 10);
-        g.addEdge('A', 'C', 18);
-        g.addEdge('B', 'C', 5);
-        g.addEdge('C', 'D', 8);
-        g.addEdge('B', 'D', 15);
-        return AStar.runGenerator(g, 'A', 'D');
-      }
+
       case 'linearsearch': {
         const array = [12, 24, 35, 48, 59, 72, 85, 96];
         function* runLinearSearch() {
@@ -781,7 +744,7 @@ export default function Dashboard() {
                 )}
 
                 {/* 3. Graphs Pathfinder */}
-                {['dijkstra', 'astar'].includes(selectedAlgo) && (
+                {selectedAlgo === 'dijkstra' && (
                   <div className="w-full aspect-[2/1] max-w-[400px]">
                     <svg viewBox="0 0 100 50" className="w-full h-full">
                       {/* Edges */}
