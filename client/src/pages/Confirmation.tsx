@@ -18,7 +18,7 @@ export default function Confirmation({
   onHome
 }: ConfirmationProps) {
   const [verifyHash, setVerifyHash] = useState('');
-  
+
   const getHashIndex = (hashKey: string) => {
     let hashVal = 5381;
     for (let i = 0; i < hashKey.length; i++) {
@@ -44,7 +44,7 @@ export default function Confirmation({
     try {
       const res = await fetch(`/api/verify/${verifyHash.trim()}`);
       const data = await res.json();
-      
+
       if (res.ok && data.verified) {
         setVerificationResult({
           searched: true,
@@ -144,7 +144,7 @@ export default function Confirmation({
               Gate Verification Agent
             </h3>
             <p className="text-[11px] text-slate-500 leading-relaxed font-light mb-6">
-              Simulates the ticket checker gate. Type the Ticket Hash Code shown on the left to verify this booking 
+              Simulates the ticket checker gate. Type the Ticket Hash Code shown on the left to verify this booking
               using our backend **Custom HashMap** in constant time $O(1)$.
             </p>
 
@@ -176,7 +176,7 @@ export default function Confirmation({
                     <div>
                       <h4 className="text-xs font-bold text-teal-400 uppercase tracking-wider">TICKET VALIDATED</h4>
                       <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
-                        Booking verified for <strong>{verificationResult.booking?.movieTitle}</strong>. 
+                        Booking verified for <strong>{verificationResult.booking?.movieTitle}</strong>.
                         Seats: {verificationResult.booking?.seats.join(', ')} confirmed at {verificationResult.booking?.theatreName}.
                       </p>
                     </div>
@@ -203,7 +203,7 @@ export default function Confirmation({
             >
               BOOK MORE TICKETS
             </button>
-            
+
             <p className="text-[9px] text-slate-500 leading-relaxed font-light font-mono text-center">
               Constant-Time Search O(1) HashMap bucket query.
             </p>

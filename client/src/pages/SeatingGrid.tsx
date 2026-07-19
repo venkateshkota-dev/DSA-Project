@@ -26,7 +26,7 @@ export default function SeatingGrid({
   const [ticketCount, setTicketCount] = useState<number>(2);
   const [dsaLogs, setDsaLogs] = useState<string[]>([]);
   const [stackState, setStackState] = useState<string[]>([]);
-  
+
   // Custom undo stack from shared DSA directory
   const [undoStack] = useState(() => new UndoSeatSelection<string>());
 
@@ -177,7 +177,7 @@ export default function SeatingGrid({
                 <span className="w-5 text-right font-bold text-slate-500 text-xs mr-2">
                   {String.fromCharCode(65 + rIdx)}
                 </span>
-                
+
                 {/* Seats */}
                 <div className="flex gap-2">
                   {row.map(seat => {
@@ -187,13 +187,12 @@ export default function SeatingGrid({
                         key={seat.label}
                         disabled={seat.isBooked}
                         onClick={() => handleSeatClick(seat)}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold border transition-all duration-300 ${
-                          seat.isBooked
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold border transition-all duration-300 ${seat.isBooked
                             ? 'bg-slate-800/80 border-slate-900 text-slate-600 cursor-not-allowed'
                             : isSelected
-                            ? 'bg-gold-500 border-gold-400 text-cinema-black glow-gold'
-                            : 'bg-cinema-card border-cinema-border text-slate-400 hover:border-slate-500'
-                        }`}
+                              ? 'bg-gold-500 border-gold-400 text-cinema-black glow-gold'
+                              : 'bg-cinema-card border-cinema-border text-slate-400 hover:border-slate-500'
+                          }`}
                       >
                         {seat.col + 1}
                       </button>
@@ -231,7 +230,7 @@ export default function SeatingGrid({
           {/* Automatic Allocators panel */}
           <div className="glass-panel border border-cinema-border rounded-2xl p-5">
             <h3 className="font-bold text-white text-sm mb-4">Smart Seat Recommender</h3>
-            
+
             {/* Ticket Counter */}
             <div className="flex items-center justify-between bg-cinema-black border border-cinema-border rounded-xl p-3.5 mb-4">
               <span className="text-xs text-slate-400 font-semibold">Seat Count:</span>
@@ -345,11 +344,10 @@ export default function SeatingGrid({
             <button
               onClick={() => onProceedToCheckout(selectedSeats)}
               disabled={selectedSeats.length === 0}
-              className={`w-full py-4 rounded-xl font-extrabold text-xs tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 ${
-                selectedSeats.length > 0
+              className={`w-full py-4 rounded-xl font-extrabold text-xs tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 ${selectedSeats.length > 0
                   ? 'bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-cinema-black shadow-lg glow-gold'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-              }`}
+                }`}
             >
               <ShieldCheck className="w-4 h-4" />
               PROCEED TO CHECKOUT

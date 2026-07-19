@@ -75,7 +75,7 @@ export default function CheckoutSimulation({
     // 2. Fire requests concurrently with a 250ms visual stagger delay
     const requests = virtualUsers.map(async (user, idx) => {
       const staggerDelay = idx * 250;
-      
+
       // Update state to show request is queued (waiting in FIFO queue)
       setRequestStates(prev => ({
         ...prev,
@@ -165,7 +165,7 @@ export default function CheckoutSimulation({
   const requestCounter = Object.values(requestStates).filter(r => r.status !== 'idle').length;
   const completedRequests = Object.values(requestStates).filter(r => r.status === 'completed').length;
   const blockedRequests = Object.values(requestStates).filter(r => r.status === 'rejected').length;
-  
+
   const isRaceCondition = syncMode === 'None' && completedRequests > 1;
   const isMutexActive = syncMode === 'Mutex' && isSimulating;
   const isSemaphoreActive = syncMode === 'Semaphore' && isSimulating;
@@ -204,15 +204,14 @@ export default function CheckoutSimulation({
               <Cpu className="w-4 h-4 text-gold-400" />
               Synchronization Protocol
             </h3>
-            
+
             <div className="flex flex-col gap-2.5">
               <button
                 onClick={() => setSyncMode('None')}
-                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${
-                  syncMode === 'None'
+                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${syncMode === 'None'
                     ? 'bg-red-500/10 border-red-500 text-red-400 glow-red'
                     : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
-                }`}
+                  }`}
               >
                 <span>No Synchronization</span>
                 <span className="text-[9px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-mono font-normal">Race Condition</span>
@@ -220,11 +219,10 @@ export default function CheckoutSimulation({
 
               <button
                 onClick={() => setSyncMode('Mutex')}
-                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${
-                  syncMode === 'Mutex'
+                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${syncMode === 'Mutex'
                     ? 'bg-teal-500/10 border-teal-400 text-teal-400 glow-teal'
                     : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
-                }`}
+                  }`}
               >
                 <span>Mutex Exclusion Lock</span>
                 <span className="text-[9px] bg-teal-500/20 text-teal-400 px-2 py-0.5 rounded font-mono font-normal">Atomic lock</span>
@@ -232,11 +230,10 @@ export default function CheckoutSimulation({
 
               <button
                 onClick={() => setSyncMode('Semaphore')}
-                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${
-                  syncMode === 'Semaphore'
+                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${syncMode === 'Semaphore'
                     ? 'bg-purple-500/10 border-purple-500 text-purple-400'
                     : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
-                }`}
+                  }`}
               >
                 <span>Semaphore Throttling</span>
                 <span className="text-[9px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-mono font-normal">Permits: 2</span>
@@ -256,22 +253,19 @@ export default function CheckoutSimulation({
           {/* Real-time Status Badges & Counters */}
           <div className="glass-panel border border-cinema-border rounded-2xl p-5 space-y-4">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Live Monitor System</h3>
-            
+
             {/* Glowing Status BADGES */}
             <div className="grid grid-cols-2 gap-2 text-[10px] font-bold font-mono uppercase">
-              <div className={`p-2 rounded-lg border text-center transition-all ${
-                isRaceCondition ? 'bg-red-500/25 border-red-500 text-red-400 glow-red animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
-              }`}>
+              <div className={`p-2 rounded-lg border text-center transition-all ${isRaceCondition ? 'bg-red-500/25 border-red-500 text-red-400 glow-red animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
+                }`}>
                 Race Detected
               </div>
-              <div className={`p-2 rounded-lg border text-center transition-all ${
-                isMutexActive ? 'bg-teal-500/20 border-teal-400 text-teal-400 glow-teal animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
-              }`}>
+              <div className={`p-2 rounded-lg border text-center transition-all ${isMutexActive ? 'bg-teal-500/20 border-teal-400 text-teal-400 glow-teal animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
+                }`}>
                 Mutex Active
               </div>
-              <div className={`p-2 rounded-lg border text-center transition-all col-span-2 ${
-                isSemaphoreActive ? 'bg-purple-500/20 border-purple-500 text-purple-400 animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
-              }`}>
+              <div className={`p-2 rounded-lg border text-center transition-all col-span-2 ${isSemaphoreActive ? 'bg-purple-500/20 border-purple-500 text-purple-400 animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
+                }`}>
                 Semaphore Throttling Active
               </div>
             </div>
@@ -324,7 +318,7 @@ export default function CheckoutSimulation({
               {virtualUsers.map((user, idx) => {
                 const state = requestStates[user];
                 let statusColor = 'bg-cinema-black border-cinema-border text-slate-600';
-                
+
                 if (state.status === 'waiting') {
                   statusColor = 'bg-slate-900 border-slate-700 text-slate-300 animate-pulse';
                 } else if (state.status === 'processing') {
@@ -375,14 +369,14 @@ export default function CheckoutSimulation({
                           style={{ width: `${(state.delay) / 12}%` }}
                         />
                       )}
-                      
+
                       {/* Processing locks status bar */}
                       {state.status === 'processing' && (
                         <div className="bg-teal-500/10 text-teal-400 text-[9px] h-full flex items-center pl-2 animate-pulse w-full">
                           Acquiring lock permit...
                         </div>
                       )}
-                      
+
                       {/* Success Reservation line */}
                       {state.status === 'completed' && (
                         <div
@@ -392,7 +386,7 @@ export default function CheckoutSimulation({
                           Secured ({state.duration}ms)
                         </div>
                       )}
-                      
+
                       {/* Rejected block */}
                       {state.status === 'rejected' && (
                         <div className="bg-red-500/25 border-l border-red-500 text-red-400 text-[9px] h-full flex items-center pl-2 w-full transition-all duration-300">

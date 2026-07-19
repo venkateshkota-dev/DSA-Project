@@ -30,7 +30,7 @@ export default function ShowtimeSelection({
       .then((data: Showtime[]) => {
         // Filter by date and theatre
         const filtered = data.filter(s => s.theatreId === theatre._id && s.date === selectedDate);
-        
+
         // Sort showtimes by timing (ascending) to guarantee binary search works correctly
         const sorted = filtered.sort((a, b) => a.time.localeCompare(b.time));
         setShowtimes(sorted);
@@ -45,10 +45,10 @@ export default function ShowtimeSelection({
 
     // Binary search target
     const targetTime = showtime.time;
-    
+
     // Custom binary search generator trace
     const gen = BinarySearch.runGenerator(showtimes, showtime, (a, b) => a.time.localeCompare(b.time));
-    
+
     let step = gen.next();
     while (!step.done) {
       if (step.value.explanation) {
@@ -69,7 +69,7 @@ export default function ShowtimeSelection({
   const handleManualSearch = () => {
     if (!searchTarget.trim()) return;
     const logs: string[] = [];
-    
+
     // Find matching time
     const dummyShowtime = { time: searchTarget } as Showtime;
     const gen = BinarySearch.runGenerator(showtimes, dummyShowtime, (a, b) => a.time.localeCompare(b.time));
@@ -129,11 +129,10 @@ export default function ShowtimeSelection({
                   <button
                     key={st._id}
                     onClick={() => handleSelectShowtime(st)}
-                    className={`flex flex-col items-center gap-2 p-5 rounded-2xl border transition-all duration-300 ${
-                      isSelected
+                    className={`flex flex-col items-center gap-2 p-5 rounded-2xl border transition-all duration-300 ${isSelected
                         ? 'bg-teal-500/10 border-teal-400 text-teal-400 glow-teal scale-105'
                         : 'bg-cinema-card border-cinema-border text-slate-300 hover:border-slate-700'
-                    }`}
+                      }`}
                   >
                     <Clock className={`w-5 h-5 ${isSelected ? 'text-teal-400 animate-spin' : 'text-slate-500'}`} />
                     <span className="font-extrabold text-base">{st.time}</span>

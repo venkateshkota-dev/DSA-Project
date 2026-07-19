@@ -153,7 +153,7 @@ export default function TheatreSelection({
 
     const binarySearchLogs: string[] = [];
     const searchStart = performance.now();
-    
+
     // Run binary search generator to show step-by-step trace logs internally
     const gen = BinarySearch.runGenerator(theatreShowtimes, targetShowtime, (a, b) => a.time.localeCompare(b.time));
     let step = gen.next();
@@ -310,11 +310,10 @@ export default function TheatreSelection({
           return (
             <div
               key={theatre._id}
-              className={`glass-panel border rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 relative shadow-md hover:scale-[1.01] ${
-                isClosest
+              className={`glass-panel border rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 relative shadow-md hover:scale-[1.01] ${isClosest
                   ? 'border-gold-500/30 shadow-gold hover:border-gold-400'
                   : 'border-cinema-border hover:border-slate-700'
-              }`}
+                }`}
             >
               {/* Badge Overlay */}
               <div className="absolute top-4 right-4 flex gap-2">
@@ -385,11 +384,10 @@ export default function TheatreSelection({
                           <button
                             key={st._id}
                             onClick={() => handleTimeClick(theatre, st)}
-                            className={`px-4 py-2.5 rounded-xl border text-[11px] font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 ${
-                              isSelected
+                            className={`px-4 py-2.5 rounded-xl border text-[11px] font-bold tracking-wider transition-all duration-300 flex items-center gap-1.5 ${isSelected
                                 ? 'bg-teal-400 border-teal-400 text-cinema-black glow-teal scale-105'
                                 : 'bg-cinema-black border-cinema-border text-slate-300 hover:border-slate-600 hover:text-white'
-                            }`}
+                              }`}
                           >
                             <Clock className="w-3 h-3" />
                             {st.time}

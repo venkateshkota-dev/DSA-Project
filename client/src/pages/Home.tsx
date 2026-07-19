@@ -41,7 +41,7 @@ export default function Home({ onSelectMovie }: HomeProps) {
 
     const tStart = performance.now();
     let comparisons = 0;
-    
+
     // Perform Linear Search
     const searchTarget = searchQuery.toLowerCase();
     const matches: Movie[] = [];
@@ -164,33 +164,30 @@ export default function Home({ onSelectMovie }: HomeProps) {
           </span>
           <button
             onClick={() => handleSort('rating')}
-            className={`flex items-center gap-1 text-xs font-semibold px-4 py-3 rounded-lg border transition-all duration-300 ${
-              activeSort.includes('Rating')
+            className={`flex items-center gap-1 text-xs font-semibold px-4 py-3 rounded-lg border transition-all duration-300 ${activeSort.includes('Rating')
                 ? 'bg-gold-500/10 border-gold-400 text-gold-400 glow-gold'
                 : 'bg-cinema-card border-cinema-border text-slate-400 hover:border-slate-600'
-            }`}
+              }`}
           >
             <Star className="w-3.5 h-3.5 fill-current" />
             Rating (Merge)
           </button>
           <button
             onClick={() => handleSort('price')}
-            className={`flex items-center gap-1 text-xs font-semibold px-4 py-3 rounded-lg border transition-all duration-300 ${
-              activeSort.includes('Price')
+            className={`flex items-center gap-1 text-xs font-semibold px-4 py-3 rounded-lg border transition-all duration-300 ${activeSort.includes('Price')
                 ? 'bg-teal-500/10 border-teal-400 text-teal-400 glow-teal'
                 : 'bg-cinema-card border-cinema-border text-slate-400 hover:border-slate-600'
-            }`}
+              }`}
           >
             <CircleDollarSign className="w-3.5 h-3.5" />
             Price (Quick)
           </button>
           <button
             onClick={() => handleSort('popularity')}
-            className={`flex items-center gap-1 text-xs font-semibold px-4 py-3 rounded-lg border transition-all duration-300 ${
-              activeSort.includes('Popularity')
+            className={`flex items-center gap-1 text-xs font-semibold px-4 py-3 rounded-lg border transition-all duration-300 ${activeSort.includes('Popularity')
                 ? 'bg-purple-500/10 border-purple-500 text-purple-400'
                 : 'bg-cinema-card border-cinema-border text-slate-400 hover:border-slate-600'
-            }`}
+              }`}
           >
             <TrendingUp className="w-3.5 h-3.5" />
             Popularity (Heap)
@@ -220,7 +217,7 @@ export default function Home({ onSelectMovie }: HomeProps) {
                   className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-cinema-black via-cinema-black/20 to-transparent" />
-                
+
                 {/* Rating Badge */}
                 <div className="absolute top-4 left-4 bg-cinema-black/80 backdrop-blur border border-cinema-border text-gold-400 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1">
                   <Star className="w-3.5 h-3.5 fill-gold-400 text-gold-400" />

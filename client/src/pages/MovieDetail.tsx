@@ -65,7 +65,7 @@ export default function MovieDetail({ movie, onBack, onSelectDate }: MovieDetail
             </div>
 
             <p className="text-slate-400 text-sm mt-8 leading-relaxed font-light">
-              Experience the cinematic brilliance of {movie.title}. Book your tickets now and select the 
+              Experience the cinematic brilliance of {movie.title}. Book your tickets now and select the
               optimal theater routes and seating alignments powered by our advanced graph and heap scheduling logic.
             </p>
           </div>
@@ -87,11 +87,10 @@ export default function MovieDetail({ movie, onBack, onSelectDate }: MovieDetail
                   <button
                     key={d.value}
                     onClick={() => setSelectedDate(d.value)}
-                    className={`px-5 py-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
-                      selectedDate === d.value
+                    className={`px-5 py-3 rounded-xl border text-xs font-bold transition-all duration-300 ${selectedDate === d.value
                         ? 'bg-gold-500/10 border-gold-400 text-gold-400 glow-gold'
                         : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
-                    }`}
+                      }`}
                   >
                     {d.label}
                   </button>

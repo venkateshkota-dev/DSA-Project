@@ -26,7 +26,7 @@ type Page =
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
-  
+
   // Shared Booking Flow State
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [selectedTheatre, setSelectedTheatre] = useState<Theatre | null>(null);
@@ -95,7 +95,7 @@ export default function App() {
       <main className="flex-1 w-full">
         {currentPage === 'splash' && <Splash onEnter={handleEnterCinema} />}
         {currentPage === 'home' && <Home onSelectMovie={handleSelectMovie} />}
-        
+
         {currentPage === 'movie' && selectedMovie && (
           <MovieDetail
             movie={selectedMovie}
