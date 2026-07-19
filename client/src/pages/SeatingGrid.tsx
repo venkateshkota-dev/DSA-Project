@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Undo2, Compass, GitMerge, RotateCcw, ShieldCheck } from 'lucide-react';
-import { Movie, Theatre, Showtime } from '../../../server/src/db/dbService';
+import { Movie, Theatre, Showtime } from '../../../server/src/db/types';
 import { Seat, SeatAllocator } from '../../../DSA/Greedy/SeatAllocator';
 import { AdjacentSeatFinder } from '../../../DSA/Backtracking/AdjacentSeatFinder';
 import { UndoSeatSelection } from '../../../DSA/Stack/UndoSeatSelection';

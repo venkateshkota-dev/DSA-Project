@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Ticket, QrCode, Search, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { Movie, Theatre, Showtime, Booking } from '../../../server/src/db/dbService';
+import { Movie, Theatre, Showtime, Booking } from '../../../server/src/db/types';
 
 interface ConfirmationProps {
   movie: Movie;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Clock, Ticket, Award } from 'lucide-react';
-import { Movie } from '../../../server/src/db/dbService';
+import { Movie } from '../../../server/src/db/types';
 
 interface MovieDetailProps {
   movie: Movie;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Terminal, AlertTriangle, ShieldCheck, UserCheck, Cpu, CheckCircle2, XCircle } from 'lucide-react';
-import { Movie, Theatre, Showtime } from '../../../server/src/db/dbService';
+import { Movie, Theatre, Showtime } from '../../../server/src/db/types';
 
 interface CheckoutSimulationProps {
   movie: Movie;

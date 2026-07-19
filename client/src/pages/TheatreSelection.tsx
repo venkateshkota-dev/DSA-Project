@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Navigation, Star, Clock, Ticket, Check, ChevronDown, ChevronUp, ShieldCheck, Heart, Sparkles } from 'lucide-react';
-import { Movie, Theatre, Showtime } from '../../../server/src/db/dbService';
+import { Movie, Theatre, Showtime } from '../../../server/src/db/types';
 import { Graph } from '../../../DSA/Graphs/Graph';
 import { Dijkstra } from '../../../DSA/Graphs/Dijkstra';
 import { AStar } from '../../../DSA/Graphs/AStar';

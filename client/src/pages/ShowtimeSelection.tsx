@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, History, Search } from 'lucide-react';
-import { Movie, Theatre, Showtime } from '../../../server/src/db/dbService';
+import { Movie, Theatre, Showtime } from '../../../server/src/db/types';
 import { BinarySearch } from '../../../DSA/Searching/BinarySearch';
 
 interface ShowtimeSelectionProps {

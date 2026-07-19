@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, Star, TrendingUp, CircleDollarSign } from 'lucide-react';
-import { Movie } from '../../../server/src/db/dbService';
+import { Movie } from '../../../server/src/db/types';
 import { LinearSearch } from '../../../DSA/Searching/LinearSearch';
 import { MergeSort } from '../../../DSA/Sorting/MergeSort';
 import { QuickSort } from '../../../DSA/Sorting/QuickSort';

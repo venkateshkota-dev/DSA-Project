@@ -10,7 +10,7 @@ import CheckoutSimulation from './pages/CheckoutSimulation';
 import Confirmation from './pages/Confirmation';
 import Dashboard from './pages/Dashboard';
 import Comparison from './pages/Comparison';
-import { Movie, Theatre, Showtime, Booking } from '../../server/src/db/dbService';
+import { Movie, Theatre, Showtime, Booking } from '../../server/src/db/types';
 
 type Page =
   | 'splash'
