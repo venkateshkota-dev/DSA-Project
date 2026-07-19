@@ -101,11 +101,6 @@ export default function Splash({ onEnter }: SplashProps) {
           Interactive DSA Visualization Platform
         </p>
 
-        <p className="text-slate-400 text-sm md:text-base mb-12 font-light leading-relaxed">
-          A high-fidelity full-stack movie ticket scheduler constructed to demonstrate the visual, step-by-step 
-          execution of 22 fundamental algorithms including shortest paths, sorting comparisons, concurrency locks, and backtracking heuristics.
-        </p>
-
         <button
           onClick={onEnter}
           className="flex items-center gap-3 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-cinema-black font-extrabold text-base px-10 py-5 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 glow-gold"

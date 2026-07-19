@@ -154,13 +154,6 @@ export default function App() {
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'comparison' && <Comparison />}
       </main>
-
-      {/* Footer */}
-      {currentPage !== 'splash' && (
-        <footer className="border-t border-cinema-border bg-slate-950/60 py-6 text-center text-xs text-slate-500 font-light mt-12">
-          <p>© {new Date().getFullYear()} CineBook Inc. Constructed strictly for educational viva evaluations.</p>
-        </footer>
-      )}
     </div>
   );
 }
