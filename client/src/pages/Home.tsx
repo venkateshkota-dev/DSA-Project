@@ -116,21 +116,7 @@ export default function Home({ onSelectMovie }: HomeProps) {
           <h2 className="text-3xl font-extrabold text-white tracking-wide">
             NOW SHOWING
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Browse catalogue using search and sorting algorithms.</p>
-        </div>
-
-        {/* Algorithm Trace Panels */}
-        <div className="flex flex-col gap-2 max-w-md w-full">
-          {searchStats && (
-            <div className="text-[11px] font-mono border border-teal-500/20 bg-teal-500/5 text-teal-400 px-3 py-2 rounded-lg leading-relaxed">
-              <strong>[DSA Search Log]:</strong> {searchStats}
-            </div>
-          )}
-          {sortStats && (
-            <div className="text-[11px] font-mono border border-gold-500/20 bg-gold-500/5 text-gold-400 px-3 py-2 rounded-lg leading-relaxed">
-              <strong>[DSA Sort Log]:</strong> {sortStats}
-            </div>
-          )}
+          <p className="text-slate-400 text-sm mt-1">Browse movies currently playing in theatres.</p>
         </div>
       </div>
 
@@ -141,7 +127,7 @@ export default function Home({ onSelectMovie }: HomeProps) {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
           <input
             type="text"
-            placeholder="Search movie titles (triggers Linear Search)..."
+            placeholder="Search movie titles..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -170,7 +156,7 @@ export default function Home({ onSelectMovie }: HomeProps) {
               }`}
           >
             <Star className="w-3.5 h-3.5 fill-current" />
-            Rating (Merge)
+            Rating
           </button>
           <button
             onClick={() => handleSort('price')}
@@ -180,7 +166,7 @@ export default function Home({ onSelectMovie }: HomeProps) {
               }`}
           >
             <CircleDollarSign className="w-3.5 h-3.5" />
-            Price (Quick)
+            Price
           </button>
           <button
             onClick={() => handleSort('popularity')}
@@ -190,7 +176,7 @@ export default function Home({ onSelectMovie }: HomeProps) {
               }`}
           >
             <TrendingUp className="w-3.5 h-3.5" />
-            Popularity (Heap)
+            Popularity
           </button>
         </div>
       </div>

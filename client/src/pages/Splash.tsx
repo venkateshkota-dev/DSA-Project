@@ -98,7 +98,7 @@ export default function Splash({ onEnter }: SplashProps) {
         </h1>
         
         <p className="text-teal-400 text-xs md:text-sm tracking-[0.4em] font-bold uppercase mt-2 mb-8">
-          Interactive DSA Visualization Platform
+          Premium Cinema Ticket Booking Platform
         </p>
 
         <button

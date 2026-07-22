@@ -8,7 +8,7 @@ import ShowtimeSelection from './pages/ShowtimeSelection';
 import SeatingGrid from './pages/SeatingGrid';
 import CheckoutSimulation from './pages/CheckoutSimulation';
 import Confirmation from './pages/Confirmation';
-import Dashboard from './pages/Dashboard';
+import BookingHistory from './pages/BookingHistory';
 import { Movie, Theatre, Showtime, Booking } from '../../server/src/db/types';
 
 type Page =
@@ -20,7 +20,7 @@ type Page =
   | 'seating'
   | 'checkout'
   | 'confirmation'
-  | 'dashboard';
+  | 'history';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
@@ -149,7 +149,7 @@ export default function App() {
           />
         )}
 
-        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'history' && <BookingHistory onNavigate={handleNavigate} />}
       </main>
     </div>
   );

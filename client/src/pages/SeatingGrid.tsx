@@ -258,21 +258,21 @@ export default function SeatingGrid({
                 className="flex items-center justify-center gap-1.5 bg-cinema-black hover:bg-slate-950 border border-gold-500/30 hover:border-gold-400 text-[11px] font-bold text-gold-400 py-3.5 rounded-xl transition-all"
               >
                 <Compass className="w-3.5 h-3.5" />
-                Greedy Center
+                Best Center Seats
               </button>
               <button
                 onClick={handleBacktrackingAllocate}
                 className="flex items-center justify-center gap-1.5 bg-cinema-black hover:bg-slate-950 border border-teal-500/30 hover:border-teal-400 text-[11px] font-bold text-teal-400 py-3.5 rounded-xl transition-all"
               >
                 <GitMerge className="w-3.5 h-3.5" />
-                Backtrack Cluster
+                Best Group Seats
               </button>
             </div>
 
             {/* Undo Stack Visual */}
             <div className="border-t border-cinema-border pt-4 mt-4">
               <div className="flex items-center justify-between mb-3.5">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Selection History Stack</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Selection History</span>
                 <div className="flex gap-2">
                   <button
                     onClick={handleUndo}
@@ -294,7 +294,7 @@ export default function SeatingGrid({
               </div>
 
               {stackState.length === 0 ? (
-                <p className="text-[10px] text-slate-600 font-mono italic">Stack is currently empty.</p>
+                <p className="text-[10px] text-slate-600 font-mono italic">No seats selected.</p>
               ) : (
                 <div className="flex flex-wrap gap-1.5 p-2 bg-slate-950 rounded-lg border border-cinema-border max-h-[80px] overflow-y-auto">
                   <AnimatePresence>
@@ -307,7 +307,7 @@ export default function SeatingGrid({
                         transition={{ duration: 0.2 }}
                         className="text-[9px] font-mono font-bold bg-slate-900 border border-cinema-border px-2 py-0.5 rounded text-gold-400 glow-gold"
                       >
-                        [{index}]: {seat}
+                        [{index + 1}]: {seat}
                       </motion.span>
                     ))}
                   </AnimatePresence>
@@ -318,7 +318,7 @@ export default function SeatingGrid({
 
           {/* Allocation Logs console */}
           <div className="glass-panel border border-cinema-border rounded-2xl p-5 max-h-[220px] overflow-y-auto">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recommendation Steps Trace</h4>
+            <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recommendation Details</h4>
             <div className="flex flex-col gap-1.5 font-mono text-[9px] text-slate-400">
               {dsaLogs.map((log, idx) => (
                 <div key={idx} className="border-l-2 border-gold-500/40 pl-2 leading-relaxed">
@@ -326,7 +326,7 @@ export default function SeatingGrid({
                 </div>
               ))}
               {dsaLogs.length === 0 && (
-                <span className="text-slate-600 italic">Select seats or trigger recommendation filters to record algorithm trace logs.</span>
+                <span className="text-slate-600 italic">Select seats or click auto-recommendation buttons.</span>
               )}
             </div>
           </div>

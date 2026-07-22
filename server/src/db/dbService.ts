@@ -270,6 +270,12 @@ class DBService {
     this.memoryDB.bookings.push(booking);
   }
 
+  async getBookings(): Promise<Booking[]> {
+    return [...this.memoryDB.bookings].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
   async getBooking(bookingId: string): Promise<Booking | undefined> {
     return this.memoryDB.bookings.find(b => b._id === bookingId || b.bookingHash === bookingId);
   }

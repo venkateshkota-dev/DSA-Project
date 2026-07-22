@@ -65,8 +65,7 @@ export default function MovieDetail({ movie, onBack, onSelectDate }: MovieDetail
             </div>
 
             <p className="text-slate-400 text-sm mt-8 leading-relaxed font-light">
-              Experience the cinematic brilliance of {movie.title}. Book your tickets now and select the
-              optimal theater routes and seating alignments powered by our advanced graph and heap scheduling logic.
+              Experience the cinematic brilliance of {movie.title}. Book your tickets now and select your preferred cinema location and showtime slot.
             </p>
           </div>
 

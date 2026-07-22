@@ -93,7 +93,17 @@ router.post('/seats/reset', async (req: Request, res: Response) => {
   }
 });
 
-// 6. Verification lookup using Custom Hash Map
+// 6. Get all bookings history
+router.get('/bookings', async (req: Request, res: Response) => {
+  try {
+    const bookings = await db.getBookings();
+    res.json(bookings);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. Verification lookup using Custom Hash Map
 router.get('/verify/:hash', (req: Request, res: Response) => {
   const hash = req.params.hash.toUpperCase();
   const booking = bookingHashMap.get(hash);
@@ -103,7 +113,7 @@ router.get('/verify/:hash', (req: Request, res: Response) => {
   res.json({ verified: true, booking });
 });
 
-// 7. Booking endpoint with Concurrency Options
+// 8. Booking endpoint with Concurrency Options
 router.post('/book', async (req: Request, res: Response) => {
   const { showtimeId, seats, userName, syncMode } = req.body;
   const requestId = generateHash(6);
@@ -201,6 +211,9 @@ router.post('/book', async (req: Request, res: Response) => {
       bookingHash,
       createdAt: new Date()
     };
+
+    // Save in DB store
+    await db.addBooking(newBooking);
 
     // Store in global custom indexer (BookingHashMap)
     bookingHashMap.put(bookingHash, newBooking);

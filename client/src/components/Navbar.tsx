@@ -1,5 +1,5 @@
 import React from 'react';
-import { Film, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { Film, Ticket } from 'lucide-react';
 
 interface NavbarProps {
   currentPage: string;
@@ -19,7 +19,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
           <h1 className="font-extrabold text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-slate-100">
             CINE<span className="text-teal-400 font-bold">BOOK</span>
           </h1>
-          <p className="text-[10px] text-teal-400 font-semibold tracking-widest uppercase">DSA Showcase</p>
+          <p className="text-[10px] text-teal-400 font-semibold tracking-widest uppercase">Cinema Ticket Booking</p>
         </div>
       </div>
 
@@ -37,17 +37,16 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
         </button>
 
         <button
-          onClick={() => onNavigate('dashboard')}
+          onClick={() => onNavigate('history')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
-            currentPage === 'dashboard'
+            currentPage === 'history'
               ? 'bg-teal-400 text-cinema-black shadow-md glow-teal'
               : 'text-slate-400 hover:text-teal-400 hover:bg-white/5'
           }`}
         >
-          <LayoutDashboard className="w-4 h-4" />
-          DSA Dashboard
+          <Ticket className="w-4 h-4" />
+          Booking History
         </button>
-
       </nav>
     </header>
   );

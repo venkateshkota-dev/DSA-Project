@@ -12,6 +12,15 @@ interface TheatreSelectionProps {
   onSelectShowtime: (theatre: Theatre, showtime: Showtime) => void;
 }
 
+const THEATRE_LOCATIONS: Record<string, string> = {
+  th_1: 'Ameerpet, Hyderabad',
+  th_2: 'Secunderabad, Hyderabad',
+  th_3: 'Kukatpally, Hyderabad',
+  th_4: 'Abids, Hyderabad',
+  th_5: 'Hitech City, Hyderabad',
+  th_6: 'Banjara Hills, Hyderabad',
+};
+
 const THEATRE_METRICS: Record<string, { rating: number; type: string; facilities: string[]; seats: number }> = {
   th_1: { rating: 4.2, type: 'Dolby Atmos', facilities: ['Parking', 'Food Court'], seats: 120 },
   th_2: { rating: 4.8, type: 'IMAX 3D', facilities: ['Parking', 'Food Court', 'Wheelchair Access'], seats: 248 },
@@ -205,82 +214,8 @@ export default function TheatreSelection({
         </div>
 
         <div className="text-right text-xs text-slate-500 font-mono mt-4 md:mt-0">
-          📍 Sorted automatically by closest network routing distance (Dijkstra)
+          📍 Nearest Cinema Locations
         </div>
-      </div>
-
-      {/* Algorithm Details Expandable Drawer */}
-      <div className="mb-8 bg-cinema-card/50 border border-cinema-border rounded-2xl overflow-hidden shadow-xl transition-all duration-300">
-        <button
-          onClick={() => setIsAlgoExpanded(!isAlgoExpanded)}
-          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-900/40 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4.5 h-4.5 text-gold-400 animate-pulse" />
-            <span className="text-xs font-extrabold text-slate-200 uppercase tracking-widest">
-              Algorithm Details & Trace Logs
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-            <span>Click to inspect DSA metrics</span>
-            {isAlgoExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </div>
-        </button>
-
-        {isAlgoExpanded && (
-          <div className="p-6 border-t border-cinema-border grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-950/60 font-mono text-[11px] text-slate-400">
-            {/* Dijkstra details */}
-            {algorithmDetails.pathfinding ? (
-              <div className="border border-cinema-border bg-cinema-black/80 rounded-xl p-4.5 space-y-3">
-                <div className="flex justify-between border-b border-cinema-border pb-2">
-                  <span className="font-bold text-slate-200">1. Distance Sorting</span>
-                  <span className="text-[10px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded">Dijkstra</span>
-                </div>
-                <div className="space-y-1.5 text-xs">
-                  <div>Algorithm: <span className="text-white font-bold">{algorithmDetails.pathfinding.algorithm}</span></div>
-                  <div>Source Node: <span className="text-teal-400">Your Location (U)</span></div>
-                  <div>Target Node: <span className="text-gold-400">{algorithmDetails.pathfinding.name}</span></div>
-                  <div>Shortest Path: <span className="text-slate-300">{algorithmDetails.pathfinding.path}</span></div>
-                  <div>Distance Calculated: <span className="text-white font-bold">{algorithmDetails.pathfinding.distance} KM</span></div>
-                  <div>Visited Nodes: <span className="text-teal-400 font-bold">{algorithmDetails.pathfinding.visitedNodes}</span></div>
-                  <div>Execution Time: <span className="text-teal-400 font-bold">{algorithmDetails.pathfinding.executionTime.toFixed(3)}ms</span></div>
-                  <div>Time Complexity: <span className="text-purple-400 font-bold">{algorithmDetails.pathfinding.timeComplexity}</span></div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center p-6 border border-cinema-border border-dashed rounded-xl text-slate-600">
-                Pathfinding details initialized on load.
-              </div>
-            )}
-
-            {/* Binary search details */}
-            {algorithmDetails.binarySearch ? (
-              <div className="border border-teal-500/20 bg-teal-500/5 rounded-xl p-4.5 space-y-3">
-                <div className="flex justify-between border-b border-teal-500/20 pb-2">
-                  <span className="font-bold text-teal-400">2. Showtime Lookup</span>
-                  <span className="text-[10px] text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded">Binary Search</span>
-                </div>
-                <div className="space-y-1.5 text-xs">
-                  <div>Target Time Slot: <span className="text-teal-400 font-bold">{algorithmDetails.binarySearch.target}</span></div>
-                  <div>Execution Time: <span className="text-teal-400 font-bold">{algorithmDetails.binarySearch.executionTime.toFixed(3)}ms</span></div>
-                  <div>Time Complexity: <span className="text-gold-400 font-bold">{algorithmDetails.binarySearch.timeComplexity}</span></div>
-                  <div className="pt-2 text-[10px] text-slate-500 border-t border-cinema-border">
-                    <span className="font-bold block mb-1">Trace Iterations:</span>
-                    <div className="space-y-1 max-h-[85px] overflow-y-auto pr-1">
-                      {algorithmDetails.binarySearch.steps.map((log: string, idx: number) => (
-                        <div key={idx} className="border-l-2 border-teal-400 pl-1.5 py-0.5">{log}</div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center p-6 border border-cinema-border border-dashed rounded-xl text-slate-500 text-center font-light leading-relaxed">
-                💡 Select any showtime timing badge on a theatre card to trigger internal Binary Search lookup.
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Theatre Card Grid List */}
@@ -308,7 +243,7 @@ export default function TheatreSelection({
                   </span>
                 ) : (
                   <span className="text-[8px] font-bold font-mono tracking-wider bg-slate-900 border border-cinema-border px-2 py-1 rounded text-slate-400">
-                    Route: {theatre.distance} km away
+                    {theatre.distance} km away
                   </span>
                 )}
               </div>
@@ -343,10 +278,10 @@ export default function TheatreSelection({
                   ))}
                 </div>
 
-                {/* Route Details */}
-                <div className="mt-4 pt-3.5 border-t border-cinema-border/50 text-[10px] text-slate-500 font-mono flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Dijkstra: {theatre.path.join(' → ')}</span>
+                {/* Location Details */}
+                <div className="mt-4 pt-3.5 border-t border-cinema-border/50 text-[11px] text-slate-300 font-medium flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-teal-400" />
+                  <span>Location: <strong className="text-white">{THEATRE_LOCATIONS[theatre._id] || 'Hyderabad'}</strong></span>
                 </div>
               </div>
 
