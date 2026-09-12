@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Terminal, AlertTriangle, ShieldCheck, UserCheck, Cpu, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  ShieldCheck,
+  Lock,
+  Unlock,
+  Clock,
+  Film,
+  MapPin,
+  CreditCard,
+  Users,
+  CheckCircle2,
+  AlertTriangle,
+  Sparkles,
+  Zap,
+  Ticket,
+  ChevronRight,
+  UserCheck
+} from 'lucide-react';
 import { Movie, Theatre, Showtime } from '../../../server/src/db/types';
 
 interface CheckoutSimulationProps {
@@ -19,427 +36,507 @@ export default function CheckoutSimulation({
   onBack,
   onConfirmBooking
 }: CheckoutSimulationProps) {
-  const [syncMode, setSyncMode] = useState<'None' | 'Mutex' | 'Semaphore'>('None');
-  const [simLogs, setSimLogs] = useState<string[]>([]);
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [successfulBooking, setSuccessfulBooking] = useState<any>(null);
-  const [doubleBookingsCount, setDoubleBookingsCount] = useState<number>(0);
+  // Customer input states
+  const [userName, setUserName] = useState('Alex Morgan');
+  const [userEmail, setUserEmail] = useState('alex.morgan@example.com');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking'>('upi');
 
-  const virtualUsers = ['Alice', 'Bob', 'Charlie', 'David', 'Eve'];
+  // Mutex & Concurrency States
+  const [syncMode, setSyncMode] = useState<'Mutex' | 'None'>('Mutex');
+  const [mutexState, setMutexState] = useState<'unlocked' | 'locked' | 'released'>('unlocked');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSimulatingTraffic, setIsSimulatingTraffic] = useState(false);
+  const [logs, setLogs] = useState<string[]>([
+    '🔒 Mutex Concurrency Control ready. System will serialize transaction during checkout.'
+  ]);
+  const [trafficResults, setTrafficResults] = useState<{ user: string; success: boolean; time: number }[]>([]);
 
-  // Track state of each user request for the timeline and counters
-  const [requestStates, setRequestStates] = useState<Record<string, {
-    status: 'idle' | 'waiting' | 'processing' | 'completed' | 'rejected';
-    duration: number;
-    delay: number;
-  }>>({
-    Alice: { status: 'idle', duration: 0, delay: 0 },
-    Bob: { status: 'idle', duration: 0, delay: 0 },
-    Charlie: { status: 'idle', duration: 0, delay: 0 },
-    David: { status: 'idle', duration: 0, delay: 0 },
-    Eve: { status: 'idle', duration: 0, delay: 0 },
-  });
+  // Price calculations
+  const subtotal = selectedSeats.length * showtime.price;
+  const convenienceFee = 30;
+  const grandTotal = subtotal + convenienceFee;
 
-  // Run the concurrency simulation
-  const handleRunSimulation = async () => {
-    setIsSimulating(true);
-    setSuccessfulBooking(null);
-    setDoubleBookingsCount(0);
-    setSimLogs([`[SIM] Initializing concurrent booking simulation with sync mode: ${syncMode}...`]);
+  const getFormatDate = (dateStr: string) => {
+    const options: Intl.DateTimeFormatOptions = { weekday: 'short', day: 'numeric', month: 'short' };
+    return new Date(dateStr).toLocaleDateString('en-US', options);
+  };
 
-    // Reset request states
-    setRequestStates({
-      Alice: { status: 'idle', duration: 0, delay: 0 },
-      Bob: { status: 'idle', duration: 0, delay: 0 },
-      Charlie: { status: 'idle', duration: 0, delay: 0 },
-      David: { status: 'idle', duration: 0, delay: 0 },
-      Eve: { status: 'idle', duration: 0, delay: 0 },
-    });
+  // Helper log function
+  const addLog = (msg: string) => {
+    setLogs(prev => [msg, ...prev.slice(0, 14)]);
+  };
 
-    // 1. Reset seats on the backend database
+  // 1. Primary Customer Checkout Action with Mutex Lock Demonstration
+  const handleCustomerCheckout = async () => {
+    if (!userName.trim()) return;
+    setIsProcessing(true);
+    setMutexState('unlocked');
+
+    addLog(`🚀 [CHECKOUT] Customer "${userName}" initiated checkout for seats: ${selectedSeats.join(', ')}.`);
+
+    if (syncMode === 'Mutex') {
+      addLog(`🔒 [MUTEX] Acquiring exclusive lock permit for critical section...`);
+      setMutexState('locked');
+      await new Promise(r => setTimeout(r, 600)); // Visual lock acquiring pause
+    } else {
+      addLog(`⚠️ [WARNING] Checkout running WITHOUT Mutex synchronization! Race conditions possible.`);
+    }
+
+    try {
+      const response = await fetch('/api/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          showtimeId: showtime._id,
+          seats: selectedSeats,
+          userName: userName.trim(),
+          syncMode
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        addLog(`✅ [SUCCESS] Reservation atomic lock confirmed! Booking Hash: ${data.booking.bookingHash}`);
+        setMutexState('released');
+        await new Promise(r => setTimeout(r, 600));
+        setIsProcessing(false);
+        onConfirmBooking(data.booking);
+      } else {
+        addLog(`❌ [FAILED] Checkout rejected. ${data.error || 'Seats already reserved.'}`);
+        setMutexState('unlocked');
+        setIsProcessing(false);
+      }
+    } catch (err: any) {
+      addLog(`❌ [ERROR] Network transaction error: ${err.message}`);
+      setMutexState('unlocked');
+      setIsProcessing(false);
+    }
+  };
+
+  // 2. High-traffic spike simulator (fires 5 simultaneous requests for exact same seats)
+  const handleSimulateTrafficSpike = async () => {
+    setIsSimulatingTraffic(true);
+    setTrafficResults([]);
+    addLog(`💥 [TRAFFIC RUSH] Firing 5 simultaneous user requests for seats: ${selectedSeats.join(', ')}...`);
+
+    // Reset seats on backend database first
     try {
       await fetch('/api/seats/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ showtimeId: showtime._id, seats: selectedSeats })
       });
-      setSimLogs(prev => [
-        ...prev,
-        `[SIM] Reset database reservation status for seats: ${selectedSeats.join(', ')}.`,
-        `[SIM] Queueing 5 concurrent booking requests in API gateway...`
-      ]);
     } catch (err) {
       console.error(err);
     }
 
-    // 2. Fire requests concurrently with a 250ms visual stagger delay
-    const requests = virtualUsers.map(async (user, idx) => {
-      const staggerDelay = idx * 250;
+    const users = ['Alice', 'Bob', 'Charlie', 'David', 'Eve'];
 
-      // Update state to show request is queued (waiting in FIFO queue)
-      setRequestStates(prev => ({
-        ...prev,
-        [user]: { status: 'waiting', duration: 0, delay: staggerDelay }
-      }));
+    if (syncMode === 'Mutex') {
+      setMutexState('locked');
+    }
 
-      // Wait for stagger delay
-      await new Promise(resolve => setTimeout(resolve, staggerDelay));
-
-      // Update state to show processing
-      setRequestStates(prev => ({
-        ...prev,
-        [user]: { ...prev[user], status: 'processing' }
-      }));
+    const requests = users.map(async (u, idx) => {
+      const stagger = idx * 150;
+      await new Promise(r => setTimeout(r, stagger));
 
       const tStart = performance.now();
       try {
-        const response = await fetch('/api/book', {
+        const res = await fetch('/api/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             showtimeId: showtime._id,
             seats: selectedSeats,
-            userName: user,
+            userName: u,
             syncMode
           })
         });
-        const tEnd = performance.now();
-        const data = await response.json();
-        const duration = Math.round(tEnd - tStart);
-
-        // Update state with result
-        setRequestStates(prev => ({
-          ...prev,
-          [user]: { ...prev[user], status: data.success ? 'completed' : 'rejected', duration }
-        }));
-
-        return { user, success: data.success, data, duration };
-      } catch (err: any) {
-        setRequestStates(prev => ({
-          ...prev,
-          [user]: { ...prev[user], status: 'rejected', duration: 0 }
-        }));
-        return { user, success: false, data: { error: err.message }, duration: 0 };
+        const data = await res.json();
+        const duration = Math.round(performance.now() - tStart);
+        return { user: u, success: data.success, duration };
+      } catch (err) {
+        return { user: u, success: false, duration: 0 };
       }
     });
 
     const results = await Promise.all(requests);
 
-    // 3. Process results and calculate statistics
-    const newLogs: string[] = [];
-    let successCount = 0;
-    let mainBooking: any = null;
+    const formattedResults = results.map(r => ({
+      user: r.user,
+      success: r.success,
+      time: r.duration
+    }));
 
-    results.forEach(res => {
-      if (res.success) {
-        successCount++;
-        newLogs.push(`✅ [SUCCESS] User "${res.user}" secured reservation for ${selectedSeats.join(', ')} (${res.duration}ms). Booking Hash: ${res.data.booking.bookingHash}`);
-        if (!mainBooking) {
-          mainBooking = res.data.booking;
-        }
-      } else {
-        newLogs.push(`❌ [REJECTED] User "${res.user}" request failed (${res.duration}ms). Error: ${res.data.error || 'Conflict'}`);
-      }
-    });
+    setTrafficResults(formattedResults);
 
-    if (syncMode === 'None') {
-      setDoubleBookingsCount(successCount - 1);
-      newLogs.push(`⚠️ [ANALYSIS] RACE CONDITION DETECTED! Without synchronization, ${successCount} out of 5 users booked the exact same seats!`);
-    } else if (syncMode === 'Mutex') {
-      newLogs.push(`🔒 [ANALYSIS] MUTEX ACTIVE & STABLE. The locking primitive serialized the checkout transaction, allowing only 1 user to secure seats while rejecting conflicts.`);
-    } else if (syncMode === 'Semaphore') {
-      newLogs.push(`🚦 [ANALYSIS] SEMAPHORE ACTIVE. Throttled processing pipeline capacity. (Note: Without a Mutex inside the critical section, concurrency racing still occurs inside slot limits).`);
+    const successCount = results.filter(r => r.success).length;
+
+    if (syncMode === 'Mutex') {
+      setMutexState('released');
+      addLog(`🔒 [MUTEX SUMMARY] Exactly 1 user succeeded, 4 users safely rejected. Double-booking prevented!`);
+    } else {
+      addLog(`⚠️ [RACE SUMMARY] ${successCount} users booked the same seat due to missing Mutex lock!`);
     }
 
-    setSimLogs(prev => [...prev, ...newLogs]);
-    setSuccessfulBooking(mainBooking);
-    setIsSimulating(false);
+    setIsSimulatingTraffic(false);
   };
-
-  const handleProceed = () => {
-    if (!successfulBooking) return;
-    onConfirmBooking(successfulBooking);
-  };
-
-  // Compute stats on the fly
-  const requestCounter = Object.values(requestStates).filter(r => r.status !== 'idle').length;
-  const completedRequests = Object.values(requestStates).filter(r => r.status === 'completed').length;
-  const blockedRequests = Object.values(requestStates).filter(r => r.status === 'rejected').length;
-
-  const isRaceCondition = syncMode === 'None' && completedRequests > 1;
-  const isMutexActive = syncMode === 'Mutex' && isSimulating;
-  const isSemaphoreActive = syncMode === 'Semaphore' && isSimulating;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
+      {/* Top Back Navigation */}
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors duration-300 mb-8 text-xs font-bold uppercase tracking-wider"
+        className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors duration-300 mb-8 text-xs font-semibold uppercase tracking-wider"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to seating grid
+        Back to Seating Selection
       </button>
 
-      {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-cinema-border pb-6">
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-cinema-border pb-6 gap-4">
         <div>
-          <span className="text-[10px] text-teal-400 font-bold uppercase tracking-[0.2em] bg-teal-500/10 border border-teal-500/20 px-3 py-1.5 rounded-md">
-            Thread Sandbox Room
+          <span className="text-[10px] text-gold-400 font-bold uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/20 px-3 py-1.5 rounded-md">
+            Order Review & Checkout
           </span>
           <h2 className="text-3xl font-extrabold text-white tracking-wide mt-4">
-            CONCURRENT CHECKOUT GATEWAY
+            REVISE & CONFIRM BOOKING
           </h2>
           <p className="text-slate-400 text-xs mt-2">
-            Simulate 5 users purchasing seats <strong className="text-gold-400">{selectedSeats.join(', ')}</strong> at the exact same millisecond.
+            Review your movie showtime details and complete secure checkout with Mutex Concurrency Protection.
           </p>
+        </div>
+
+        <div className="flex items-center gap-2 bg-cinema-card border border-cinema-border px-4 py-2 rounded-xl text-xs text-slate-300">
+          <ShieldCheck className="w-4 h-4 text-teal-400" />
+          <span>Mutex Protection: <strong className="text-teal-400 font-bold">{syncMode === 'Mutex' ? 'ENABLED' : 'DISABLED'}</strong></span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Side: Sandbox Settings & Stats */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          {/* Settings Panel */}
-          <div className="glass-panel border border-cinema-border rounded-2xl p-5">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-gold-400" />
-              Synchronization Protocol
-            </h3>
+        {/* Left 2 Columns: Customer Movie Revision & Order Form */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* 1. Movie & Showtime Revision Card */}
+          <div className="glass-panel border border-cinema-border rounded-3xl p-6 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row gap-6">
+              {/* Poster */}
+              <div className="w-full sm:w-36 h-48 bg-slate-900 rounded-2xl overflow-hidden shrink-0 border border-cinema-border relative">
+                <img
+                  src={movie.poster}
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur border border-cinema-border text-gold-400 text-[10px] font-bold px-2 py-0.5 rounded">
+                  ★ {movie.rating.toFixed(1)}
+                </div>
+              </div>
 
-            <div className="flex flex-col gap-2.5">
-              <button
-                onClick={() => setSyncMode('None')}
-                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${syncMode === 'None'
-                    ? 'bg-red-500/10 border-red-500 text-red-400 glow-red'
-                    : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
-                  }`}
-              >
-                <span>No Synchronization</span>
-                <span className="text-[9px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-mono font-normal">Race Condition</span>
-              </button>
+              {/* Movie & Showtime Specs */}
+              <div className="flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                  <span className="text-[10px] text-teal-400 font-semibold uppercase tracking-widest">{movie.genre}</span>
+                  <h3 className="text-2xl font-extrabold text-white tracking-wide mt-1">{movie.title}</h3>
+                  <p className="text-slate-400 text-xs mt-1 font-mono">{movie.duration} mins • English / Hindi</p>
+                </div>
 
-              <button
-                onClick={() => setSyncMode('Mutex')}
-                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${syncMode === 'Mutex'
-                    ? 'bg-teal-500/10 border-teal-400 text-teal-400 glow-teal'
-                    : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
-                  }`}
-              >
-                <span>Mutex Exclusion Lock</span>
-                <span className="text-[9px] bg-teal-500/20 text-teal-400 px-2 py-0.5 rounded font-mono font-normal">Atomic lock</span>
-              </button>
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-cinema-border/50 text-xs">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold block uppercase">Cinema Venue</span>
+                      <span className="font-bold text-white leading-tight block">{theatre.name}</span>
+                    </div>
+                  </div>
 
-              <button
-                onClick={() => setSyncMode('Semaphore')}
-                className={`w-full py-3.5 rounded-xl border text-xs font-bold transition-all duration-300 text-left px-5 flex items-center justify-between ${syncMode === 'Semaphore'
-                    ? 'bg-purple-500/10 border-purple-500 text-purple-400'
-                    : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
-                  }`}
-              >
-                <span>Semaphore Throttling</span>
-                <span className="text-[9px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-mono font-normal">Permits: 2</span>
-              </button>
+                  <div className="flex items-start gap-2">
+                    <Clock className="w-4 h-4 text-gold-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold block uppercase">Showtime Date</span>
+                      <span className="font-bold text-white leading-tight block">{getFormatDate(showtime.date)} @ {showtime.time}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Selected Seats Tag */}
+                <div className="flex items-center gap-3 pt-2">
+                  <span className="text-[11px] text-slate-400 font-semibold">Selected Seats:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedSeats.map(seat => (
+                      <span
+                        key={seat}
+                        className="text-xs font-mono font-extrabold bg-gold-500/10 border border-gold-400/40 text-gold-400 px-3 py-1 rounded-lg glow-gold"
+                      >
+                        {seat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Customer Information & Payment Details */}
+          <div className="glass-panel border border-cinema-border rounded-3xl p-6 space-y-5">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <Users className="w-4 h-4 text-teal-400" />
+              Customer Contact Details
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full bg-cinema-black border border-cinema-border rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-teal-400 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  placeholder="Enter email for e-ticket"
+                  className="w-full bg-cinema-black border border-cinema-border rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-teal-400 transition-all"
+                />
+              </div>
             </div>
 
-            {/* Simulation Run Button */}
+            {/* Payment Method Selector */}
+            <div className="pt-4 border-t border-cinema-border/50">
+              <label className="block text-[11px] font-semibold text-slate-400 mb-3 uppercase tracking-wider">
+                Select Payment Option
+              </label>
+
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('upi')}
+                  className={`p-3.5 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between ${paymentMethod === 'upi'
+                      ? 'bg-teal-500/10 border-teal-400 text-white glow-teal'
+                      : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
+                    }`}
+                >
+                  <Zap className={`w-4 h-4 mb-2 ${paymentMethod === 'upi' ? 'text-teal-400' : 'text-slate-500'}`} />
+                  <span className="text-xs font-bold block">UPI / GPay</span>
+                  <span className="text-[9px] text-slate-500 font-mono">Instant Pay</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('card')}
+                  className={`p-3.5 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between ${paymentMethod === 'card'
+                      ? 'bg-teal-500/10 border-teal-400 text-white glow-teal'
+                      : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
+                    }`}
+                >
+                  <CreditCard className={`w-4 h-4 mb-2 ${paymentMethod === 'card' ? 'text-teal-400' : 'text-slate-500'}`} />
+                  <span className="text-xs font-bold block">Credit/Debit Card</span>
+                  <span className="text-[9px] text-slate-500 font-mono">Visa / Mastercard</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('netbanking')}
+                  className={`p-3.5 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between ${paymentMethod === 'netbanking'
+                      ? 'bg-teal-500/10 border-teal-400 text-white glow-teal'
+                      : 'bg-cinema-black border-cinema-border text-slate-400 hover:border-slate-700'
+                    }`}
+                >
+                  <Ticket className={`w-4 h-4 mb-2 ${paymentMethod === 'netbanking' ? 'text-teal-400' : 'text-slate-500'}`} />
+                  <span className="text-xs font-bold block">Net Banking</span>
+                  <span className="text-[9px] text-slate-500 font-mono">All Major Banks</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Pricing Summary & Final Action Button */}
+          <div className="glass-panel border border-cinema-border rounded-3xl p-6 space-y-4">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Price Breakdown</h4>
+
+            <div className="space-y-2 text-xs text-slate-400">
+              <div className="flex justify-between">
+                <span>Tickets ({selectedSeats.length} × ₹{showtime.price}):</span>
+                <span className="font-semibold text-white">₹{subtotal}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Convenience & Booking Fee:</span>
+                <span className="font-semibold text-white">₹{convenienceFee}</span>
+              </div>
+              <div className="flex justify-between pt-3 border-t border-cinema-border text-base font-extrabold text-white">
+                <span>Total Payable:</span>
+                <span className="text-teal-400 font-mono">₹{grandTotal}</span>
+              </div>
+            </div>
+
+            {/* Primary Action Button */}
             <button
-              onClick={handleRunSimulation}
-              disabled={isSimulating}
-              className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-cinema-black font-extrabold text-xs py-4 rounded-xl mt-6 transition-all duration-300 glow-gold shadow-md disabled:opacity-40"
+              onClick={handleCustomerCheckout}
+              disabled={isProcessing || isSimulatingTraffic || !userName.trim()}
+              className={`w-full py-4 rounded-2xl font-extrabold text-xs tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 mt-4 shadow-xl ${isProcessing
+                  ? 'bg-teal-500/30 text-teal-300 cursor-wait'
+                  : 'bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-cinema-black glow-gold'
+                }`}
             >
-              {isSimulating ? 'Processing Requests...' : 'FIRE SIMULATION (5 Users)'}
+              {isProcessing ? (
+                <>
+                  <Lock className="w-4 h-4 animate-spin text-cinema-black" />
+                  ACQUIRING MUTEX LOCK & CONFIRMING...
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4" />
+                  CONFIRM & PAY ₹{grandTotal}
+                </>
+              )}
             </button>
           </div>
-
-          {/* Real-time Status Badges & Counters */}
-          <div className="glass-panel border border-cinema-border rounded-2xl p-5 space-y-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Live Monitor System</h3>
-
-            {/* Glowing Status BADGES */}
-            <div className="grid grid-cols-2 gap-2 text-[10px] font-bold font-mono uppercase">
-              <div className={`p-2 rounded-lg border text-center transition-all ${isRaceCondition ? 'bg-red-500/25 border-red-500 text-red-400 glow-red animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
-                }`}>
-                Race Detected
-              </div>
-              <div className={`p-2 rounded-lg border text-center transition-all ${isMutexActive ? 'bg-teal-500/20 border-teal-400 text-teal-400 glow-teal animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
-                }`}>
-                Mutex Active
-              </div>
-              <div className={`p-2 rounded-lg border text-center transition-all col-span-2 ${isSemaphoreActive ? 'bg-purple-500/20 border-purple-500 text-purple-400 animate-pulse' : 'bg-slate-900/50 border-cinema-border text-slate-600'
-                }`}>
-                Semaphore Throttling Active
-              </div>
-            </div>
-
-            {/* Statistical Counters */}
-            <div className="border-t border-cinema-border pt-4 space-y-2.5 text-xs text-slate-400">
-              <div className="flex justify-between font-mono">
-                <span>Request Counter:</span>
-                <span className="font-extrabold text-white">{requestCounter} / 5</span>
-              </div>
-              <div className="flex justify-between font-mono">
-                <span>Completed Requests:</span>
-                <span className="font-extrabold text-teal-400">{completedRequests}</span>
-              </div>
-              <div className="flex justify-between font-mono">
-                <span>Blocked Requests:</span>
-                <span className="font-extrabold text-red-400">{blockedRequests}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Secure Proceeds */}
-          {successfulBooking && (
-            <div className="glass-panel border border-teal-500/30 bg-teal-500/5 rounded-2xl p-5 animate-fade-in">
-              <h4 className="text-xs font-bold text-teal-400 flex items-center gap-1.5 uppercase">
-                <UserCheck className="w-4 h-4" />
-                Seat Secured
-              </h4>
-              <p className="text-[11px] text-slate-400 mt-2 leading-relaxed font-light">
-                Ticket confirmed for one of the concurrent clients under reservation code: <strong>{successfulBooking.bookingHash}</strong>.
-              </p>
-              <button
-                onClick={handleProceed}
-                className="w-full bg-teal-400 hover:bg-teal-300 text-cinema-black font-extrabold text-xs py-3.5 rounded-xl mt-4 transition-all duration-300 glow-teal"
-              >
-                PROCEED TO TICKET GATE
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* Right Side: Timeline chart & horizontal Queue */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          {/* Horizontal FIFO Queue tracker */}
-          <div className="glass-panel border border-cinema-border rounded-2xl p-5">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-              Gateway Request Buffer Queue (FIFO)
-            </h3>
-            <div className="flex items-center flex-wrap gap-2 text-xs font-bold font-mono">
-              {virtualUsers.map((user, idx) => {
-                const state = requestStates[user];
-                let statusColor = 'bg-cinema-black border-cinema-border text-slate-600';
+        {/* Right 1 Column: Compact Mutex Concurrency Control Side Box */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Side Box Card */}
+          <div className="glass-panel border border-teal-500/30 rounded-3xl p-6 space-y-5 bg-gradient-to-b from-cinema-card via-cinema-card to-teal-950/20 shadow-2xl relative overflow-hidden">
+            {/* Corner Glow Accent */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
 
-                if (state.status === 'waiting') {
-                  statusColor = 'bg-slate-900 border-slate-700 text-slate-300 animate-pulse';
-                } else if (state.status === 'processing') {
-                  statusColor = 'bg-teal-500/20 border-teal-400 text-teal-400 glow-teal';
-                } else if (state.status === 'completed') {
-                  statusColor = 'bg-teal-400 text-cinema-black border-teal-400 font-extrabold';
-                } else if (state.status === 'rejected') {
-                  statusColor = 'bg-red-500/20 border-red-500/40 text-red-400 font-normal';
-                }
-
-                return (
-                  <React.Fragment key={user}>
-                    <div className={`px-3 py-2 rounded-xl border tracking-wider transition-all duration-300 ${statusColor}`}>
-                      {user}
-                      <span className="block text-[8px] text-slate-500 font-normal mt-0.5 font-sans">
-                        {state.status === 'idle' && 'Idle'}
-                        {state.status === 'waiting' && 'In Queue'}
-                        {state.status === 'processing' && 'Processing'}
-                        {state.status === 'completed' && 'Completed'}
-                        {state.status === 'rejected' && 'Rejected'}
-                      </span>
-                    </div>
-                    {idx < virtualUsers.length - 1 && (
-                      <span className="text-slate-600 px-1 font-extrabold">→</span>
-                    )}
-                  </React.Fragment>
-                );
-              })}
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2.5 py-1 rounded-md">
+                  Backend Protection
+                </span>
+                <Sparkles className="w-4 h-4 text-gold-400" />
+              </div>
+              <h3 className="text-base font-extrabold text-white tracking-wide mt-3 flex items-center gap-2">
+                <Lock className="w-4 h-4 text-teal-400" />
+                Mutex Lock Live Status
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                Prevents double-booking race conditions during simultaneous multi-user checkouts.
+              </p>
             </div>
-          </div>
 
-          {/* Latency / Request Timeline Chart */}
-          <div className="space-y-4 bg-slate-950 p-6 rounded-2xl border border-cinema-border">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
-              Thread Timeline & Latency Chart
-            </span>
-            <div className="space-y-3">
-              {virtualUsers.map((user) => {
-                const state = requestStates[user];
-                return (
-                  <div key={user} className="flex items-center justify-between text-xs font-mono">
-                    <span className="w-16 font-bold text-slate-300">{user}</span>
-                    <div className="flex-1 mx-4 h-6 bg-cinema-black border border-cinema-border rounded-lg relative overflow-hidden flex items-center">
-                      {/* Queue Stagger Delay block */}
-                      {state.status !== 'idle' && (
-                        <div
-                          className="bg-slate-900 border-r border-cinema-border/50 h-full transition-all duration-300"
-                          style={{ width: `${(state.delay) / 12}%` }}
-                        />
-                      )}
+            {/* Live State Indicator Visual */}
+            <div className="p-4 bg-slate-950 rounded-2xl border border-cinema-border space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400 text-[10px] uppercase tracking-wider font-semibold">Current State:</span>
+                <span className={`font-mono text-xs font-extrabold px-2.5 py-1 rounded-lg uppercase flex items-center gap-1.5 ${mutexState === 'locked'
+                    ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 glow-gold animate-pulse'
+                    : mutexState === 'released'
+                      ? 'bg-teal-500/20 text-teal-400 border border-teal-500/40 glow-teal'
+                      : 'bg-slate-900 text-slate-400 border border-cinema-border'
+                  }`}>
+                  {mutexState === 'locked' && <Lock className="w-3 h-3 text-gold-400" />}
+                  {mutexState === 'released' && <CheckCircle2 className="w-3 h-3 text-teal-400" />}
+                  {mutexState === 'unlocked' && <Unlock className="w-3 h-3 text-slate-500" />}
+                  {mutexState}
+                </span>
+              </div>
 
-                      {/* Processing locks status bar */}
-                      {state.status === 'processing' && (
-                        <div className="bg-teal-500/10 text-teal-400 text-[9px] h-full flex items-center pl-2 animate-pulse w-full">
-                          Acquiring lock permit...
-                        </div>
-                      )}
+              {/* Lock Visual Pipeline */}
+              <div className="grid grid-cols-3 gap-1.5 text-[9px] font-mono font-bold text-center">
+                <div className={`p-2 rounded-xl border transition-all ${mutexState === 'unlocked' ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-slate-950 border-cinema-border text-slate-600'}`}>
+                  1. Idle
+                </div>
+                <div className={`p-2 rounded-xl border transition-all ${mutexState === 'locked' ? 'bg-gold-500/20 border-gold-400 text-gold-400 glow-gold' : 'bg-slate-950 border-cinema-border text-slate-600'}`}>
+                  2. Locked
+                </div>
+                <div className={`p-2 rounded-xl border transition-all ${mutexState === 'released' ? 'bg-teal-500/20 border-teal-400 text-teal-400 glow-teal' : 'bg-slate-950 border-cinema-border text-slate-600'}`}>
+                  3. Released
+                </div>
+              </div>
+            </div>
 
-                      {/* Success Reservation line */}
-                      {state.status === 'completed' && (
-                        <div
-                          className="bg-teal-500 text-cinema-black font-extrabold text-[9px] h-full flex items-center pl-2 transition-all duration-500"
-                          style={{ width: `${Math.min(100, (state.duration) / 3.5)}%` }}
-                        >
-                          Secured ({state.duration}ms)
-                        </div>
-                      )}
+            {/* Protocol Switcher */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Synchronization Protocol
+              </label>
 
-                      {/* Rejected block */}
-                      {state.status === 'rejected' && (
-                        <div className="bg-red-500/25 border-l border-red-500 text-red-400 text-[9px] h-full flex items-center pl-2 w-full transition-all duration-300">
-                          Conflict Blocked
-                        </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSyncMode('Mutex');
+                    addLog('🔒 Switched to Mutex Exclusion Lock (Atomic seat protection ON).');
+                  }}
+                  className={`px-3 py-2.5 rounded-xl border text-[10px] font-bold transition-all text-center flex items-center justify-center gap-1 ${syncMode === 'Mutex'
+                      ? 'bg-teal-500/10 border-teal-400 text-teal-400 glow-teal'
+                      : 'bg-cinema-black border-cinema-border text-slate-500 hover:text-slate-300'
+                    }`}
+                >
+                  <Lock className="w-3 h-3" />
+                  Mutex (Protected)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSyncMode('None');
+                    addLog('⚠️ Switched to No Sync (Race Condition Hazard ON).');
+                  }}
+                  className={`px-3 py-2.5 rounded-xl border text-[10px] font-bold transition-all text-center flex items-center justify-center gap-1 ${syncMode === 'None'
+                      ? 'bg-red-500/10 border-red-500 text-red-400 glow-red'
+                      : 'bg-cinema-black border-cinema-border text-slate-500 hover:text-slate-300'
+                    }`}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  No Sync (Hazard)
+                </button>
+              </div>
+            </div>
+
+            {/* Sim Traffic Test Button */}
+            <button
+              onClick={handleSimulateTrafficSpike}
+              disabled={isSimulatingTraffic || isProcessing}
+              className="w-full bg-slate-900 hover:bg-slate-800 border border-cinema-border hover:border-gold-500/30 text-gold-400 font-bold text-[11px] py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              {isSimulatingTraffic ? 'Simulating 5 Concurrent Users...' : 'Simulate Traffic Spike (5 Users)'}
+            </button>
+
+            {/* Traffic Spike Results if executed */}
+            {trafficResults.length > 0 && (
+              <div className="p-3 bg-slate-950 rounded-xl border border-cinema-border space-y-2 text-[10px] font-mono">
+                <span className="text-slate-400 font-bold block uppercase text-[9px]">Traffic Test Results:</span>
+                <div className="space-y-1">
+                  {trafficResults.map((r, i) => (
+                    <div key={i} className="flex justify-between items-center">
+                      <span className="text-slate-300">{r.user}:</span>
+                      {r.success ? (
+                        <span className="text-teal-400 font-bold">✅ Booked ({r.time}ms)</span>
+                      ) : (
+                        <span className="text-red-400">❌ Rejected ({r.time}ms)</span>
                       )}
                     </div>
-                    <span className="w-20 text-right text-[11px]">
-                      {state.status === 'idle' && <span className="text-slate-600">Idle</span>}
-                      {state.status === 'waiting' && <span className="text-slate-400 font-normal">Waiting...</span>}
-                      {state.status === 'processing' && <span className="text-teal-400 animate-pulse font-bold">Locks...</span>}
-                      {state.status === 'completed' && <span className="text-teal-400 font-bold">Completed</span>}
-                      {state.status === 'rejected' && <span className="text-red-500">Rejected</span>}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* Console logger output */}
-          <div className="flex-1 bg-slate-950 border border-cinema-border rounded-2xl p-6 font-mono text-xs text-slate-300 shadow-2xl leading-relaxed flex flex-col justify-between">
-            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2">
-              {simLogs.map((log, idx) => {
-                const isSuccess = log.includes('SUCCESS') || log.includes('✅');
-                const isError = log.includes('REJECTED') || log.includes('❌');
-                const isWarning = log.includes('RACE CONDITION') || log.includes('⚠️');
-                const isSystem = log.includes('[SIM]');
-
-                let color = 'text-slate-400';
-                if (isSuccess) color = 'text-teal-400 font-bold';
-                else if (isError) color = 'text-red-400';
-                else if (isWarning) color = 'text-red-500 font-bold bg-red-500/5 p-2 rounded border border-red-500/10';
-                else if (isSystem) color = 'text-slate-500';
-
-                return (
-                  <div key={idx} className={`${color}`}>
+            {/* Live Mutex Event Logs Stream */}
+            <div className="space-y-2 pt-2 border-t border-cinema-border/50">
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block">
+                Live Mutex Event Stream
+              </span>
+              <div className="bg-slate-950 border border-cinema-border rounded-xl p-3 h-32 overflow-y-auto font-mono text-[9px] space-y-1.5 leading-relaxed text-slate-300">
+                {logs.map((log, i) => (
+                  <div key={i} className="border-l-2 border-teal-500/40 pl-2">
                     {log}
                   </div>
-                );
-              })}
-
-              {simLogs.length === 0 && (
-                <div className="text-slate-600 italic py-6 text-center">
-                  Select a synchronization protocol and click "FIRE SIMULATION" to launch requests.
-                </div>
-              )}
-            </div>
-
-            {/* Sandbox footer */}
-            <div className="border-t border-cinema-border pt-4 mt-6 text-[10px] text-slate-500 flex justify-between items-center">
-              <span>Simulation Server Engine: Express Gateway API v1.0</span>
-              <span className="text-[9px] bg-slate-900 border border-cinema-border px-2 py-0.5 rounded text-slate-400 font-sans">Multi-Threaded Sandbox</span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
