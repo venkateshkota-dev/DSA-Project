@@ -316,20 +316,7 @@ export default function SeatingGrid({
             </div>
           </div>
 
-          {/* Allocation Logs console */}
-          <div className="glass-panel border border-cinema-border rounded-2xl p-5 max-h-[220px] overflow-y-auto">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recommendation Details</h4>
-            <div className="flex flex-col gap-1.5 font-mono text-[9px] text-slate-400">
-              {dsaLogs.map((log, idx) => (
-                <div key={idx} className="border-l-2 border-gold-500/40 pl-2 leading-relaxed">
-                  {log}
-                </div>
-              ))}
-              {dsaLogs.length === 0 && (
-                <span className="text-slate-600 italic">Select seats or click auto-recommendation buttons.</span>
-              )}
-            </div>
-          </div>
+
 
           {/* Checkout proceeds */}
           <div className="glass-panel border border-cinema-border rounded-2xl p-5 flex flex-col gap-4">

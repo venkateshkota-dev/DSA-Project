@@ -80,8 +80,12 @@ export default function TheatreSelection({
         const filteredShowtimes = showtimesData.filter(s => s.date === selectedDate);
         setShowtimes(filteredShowtimes);
 
-        // Run pathfinding internally for each theatre
-        const enrichedTheatres = theatresData.map(theatre => {
+        // Filter out theatres that don't have any showtimes for this movie & date
+        const activeTheatreIds = new Set(filteredShowtimes.map(s => s.theatreId));
+        const activeTheatres = theatresData.filter(theatre => activeTheatreIds.has(theatre._id));
+
+        // Run pathfinding internally for each active theatre
+        const enrichedTheatres = activeTheatres.map(theatre => {
           const metrics = THEATRE_METRICS[theatre._id] || { rating: 4.0, type: 'Digital 2D', facilities: ['Parking'], seats: 100 };
 
           // Run Dijkstra generator
@@ -220,82 +224,93 @@ export default function TheatreSelection({
 
       {/* Theatre Card Grid List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sortedTheatres.map((theatre, index) => {
-          const isClosest = index === 0;
-          const theatreShowtimes = showtimes
-            .filter(s => s.theatreId === theatre._id)
-            .sort((a, b) => a.time.localeCompare(b.time));
-
-          return (
-            <div
-              key={theatre._id}
-              className={`glass-panel border rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 relative shadow-md hover:scale-[1.01] ${isClosest
-                  ? 'border-gold-500/30 shadow-gold hover:border-gold-400'
-                  : 'border-cinema-border hover:border-slate-700'
-                }`}
+        {sortedTheatres.length === 0 ? (
+          <div className="text-center py-16 border border-dashed border-cinema-border rounded-3xl col-span-full">
+            <MapPin className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-white">No Theatres Currently Screening</h3>
+            <p className="text-slate-500 text-xs mt-1">
+              There are no showtimes scheduled for <strong className="text-gold-400">{movie.title}</strong> on <strong className="text-white">{getFormatDate(selectedDate)}</strong>.
+            </p>
+            <button
+              onClick={onBack}
+              className="mt-4 text-xs font-semibold text-teal-400 bg-teal-500/10 border border-teal-500/20 px-4 py-2 rounded-xl hover:bg-teal-500/20 transition-all"
             >
-              {/* Badge Overlay */}
-              <div className="absolute top-4 right-4 flex gap-2">
-                {isClosest ? (
-                  <span className="text-[9px] font-black uppercase tracking-wider bg-gold-400 text-cinema-black px-2.5 py-1 rounded-md shadow flex items-center gap-1">
-                    <Heart className="w-2.5 h-2.5 fill-cinema-black" />
-                    Nearest Theatre
-                  </span>
-                ) : (
+              Back to Movie details
+            </button>
+          </div>
+        ) : (
+          sortedTheatres.map((theatre, index) => {
+            const isClosest = index === 0;
+            const theatreShowtimes = showtimes
+              .filter(s => s.theatreId === theatre._id)
+              .sort((a, b) => a.time.localeCompare(b.time));
+
+            return (
+              <div
+                key={theatre._id}
+                className={`glass-panel border rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 relative shadow-md hover:scale-[1.01] ${isClosest
+                    ? 'border-gold-500/30 shadow-gold hover:border-gold-400'
+                    : 'border-cinema-border hover:border-slate-700'
+                  }`}
+              >
+                {/* Badge Overlay */}
+                <div className="absolute top-4 right-4 flex items-center gap-2">
+                  {isClosest && (
+                    <span className="text-[9px] font-black uppercase tracking-wider bg-gold-400 text-cinema-black px-2.5 py-1 rounded-md shadow flex items-center gap-1">
+                      <Heart className="w-2.5 h-2.5 fill-cinema-black" />
+                      Nearest Theatre
+                    </span>
+                  )}
                   <span className="text-[8px] font-bold font-mono tracking-wider bg-slate-900 border border-cinema-border px-2 py-1 rounded text-slate-400">
                     {theatre.distance} km away
                   </span>
-                )}
-              </div>
+                </div>
 
-              {/* Theatre Card Info */}
-              <div className="p-6">
-                <div>
-                  <h3 className="text-lg font-bold text-white tracking-wide pr-24 leading-snug">
-                    {theatre.name}
-                  </h3>
-                  <div className="flex items-center gap-1.5 mt-2.5">
-                    <div className="flex items-center gap-0.5 text-gold-400">
-                      <Star className="w-3.5 h-3.5 fill-gold-400" />
-                      <span className="text-xs font-bold">{theatre.rating.toFixed(1)}</span>
+                {/* Theatre Card Info */}
+                <div className="p-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-white tracking-wide pr-24 leading-snug">
+                      {theatre.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5 mt-2.5">
+                      <div className="flex items-center gap-0.5 text-gold-400">
+                        <Star className="w-3.5 h-3.5 fill-gold-400" />
+                        <span className="text-xs font-bold">{theatre.rating.toFixed(1)}</span>
+                      </div>
+                      <span className="text-slate-600 text-[10px]">•</span>
+                      <span className="text-teal-400 text-xs font-semibold">{theatre.type}</span>
+                      <span className="text-slate-600 text-[10px]">•</span>
+                      <span className="text-slate-400 text-xs font-semibold">{theatre.travelTime} min drive</span>
                     </div>
-                    <span className="text-slate-600 text-[10px]">•</span>
-                    <span className="text-teal-400 text-xs font-semibold">{theatre.type}</span>
-                    <span className="text-slate-600 text-[10px]">•</span>
-                    <span className="text-slate-400 text-xs font-semibold">{theatre.travelTime} min drive</span>
+                  </div>
+
+                  {/* Facilities / Amenities */}
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {theatre.facilities.map((fac: string) => (
+                      <span
+                        key={fac}
+                        className="text-[9px] font-bold text-slate-400 bg-slate-900 border border-cinema-border px-2.5 py-1 rounded-full"
+                      >
+                        {fac}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Location Details */}
+                  <div className="mt-4 pt-3.5 border-t border-cinema-border/50 text-[11px] text-slate-300 font-medium flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-teal-400" />
+                    <span>Location: <strong className="text-white">{THEATRE_LOCATIONS[theatre._id] || 'Hyderabad'}</strong></span>
                   </div>
                 </div>
 
-                {/* Facilities / Amenities */}
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {theatre.facilities.map((fac: string) => (
-                    <span
-                      key={fac}
-                      className="text-[9px] font-bold text-slate-400 bg-slate-900 border border-cinema-border px-2.5 py-1 rounded-full"
-                    >
-                      {fac}
-                    </span>
-                  ))}
-                </div>
+                {/* Showtimes & Booking Area */}
+                <div className="border-t border-cinema-border bg-slate-950/40 p-6 flex flex-col gap-4">
+                  <div>
+                    <div className="flex justify-between items-center text-xs mb-2">
+                      <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Show Timings:</span>
+                      <span className="text-[10px] text-teal-400 font-semibold font-mono">Seats Available: {theatre.seats}</span>
+                    </div>
 
-                {/* Location Details */}
-                <div className="mt-4 pt-3.5 border-t border-cinema-border/50 text-[11px] text-slate-300 font-medium flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-teal-400" />
-                  <span>Location: <strong className="text-white">{THEATRE_LOCATIONS[theatre._id] || 'Hyderabad'}</strong></span>
-                </div>
-              </div>
-
-              {/* Showtimes & Booking Area */}
-              <div className="border-t border-cinema-border bg-slate-950/40 p-6 flex flex-col gap-4">
-                <div>
-                  <div className="flex justify-between items-center text-xs mb-2">
-                    <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Show Timings:</span>
-                    <span className="text-[10px] text-teal-400 font-semibold font-mono">Seats Available: {theatre.seats}</span>
-                  </div>
-
-                  {theatreShowtimes.length === 0 ? (
-                    <p className="text-[11px] text-slate-600 italic py-2">No shows scheduled for this date.</p>
-                  ) : (
                     <div className="flex flex-wrap gap-2.5">
                       {theatreShowtimes.map((st) => {
                         const isSelected = selectedTheatreId === theatre._id && selectedTimeSlot === st._id;
@@ -314,12 +329,12 @@ export default function TheatreSelection({
                         );
                       })}
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );
