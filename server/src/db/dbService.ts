@@ -10,6 +10,7 @@ export interface Movie {
   genre: string;
   duration: number; // in mins
   poster: string;
+  language?: string;
 }
 
 export interface Theatre {
@@ -40,6 +41,7 @@ export interface Booking {
   totalPrice: number;
   bookingHash: string; // HashMap key
   createdAt: Date;
+  language?: string;
 }
 
 // In-Memory Fallback Store
@@ -66,7 +68,8 @@ class InMemoryDB {
         price: 250,
         genre: 'Action, Drama, Patriotic',
         duration: 145,
-        poster: '/fauji.jpg'
+        poster: '/fauji.jpg',
+        language: 'Telugu'
       },
       {
         _id: 'mv_2',
@@ -76,7 +79,8 @@ class InMemoryDB {
         price: 300,
         genre: 'Action, Drama, Epic',
         duration: 167,
-        poster: '/bahubali.jpg'
+        poster: '/bahubali.jpg',
+        language: 'Telugu'
       },
       {
         _id: 'mv_3',
@@ -86,7 +90,8 @@ class InMemoryDB {
         price: 220,
         genre: 'Action, Crime, Thriller',
         duration: 138,
-        poster: '/spirit.jpg'
+        poster: '/spirit.jpg',
+        language: 'Telugu'
       },
       {
         _id: 'mv_4',
@@ -96,7 +101,8 @@ class InMemoryDB {
         price: 280,
         genre: 'Animation, Adventure, Mythological',
         duration: 155,
-        poster: '/ramayana.jpg'
+        poster: '/ramayana.jpg',
+        language: 'Hindi'
       },
       {
         _id: 'mv_5',
@@ -106,7 +112,8 @@ class InMemoryDB {
         price: 200,
         genre: 'Drama, History, Spiritual',
         duration: 120,
-        poster: '/varanasi.jpg'
+        poster: '/varanasi.jpg',
+        language: 'Telugu'
       }
     ];
 

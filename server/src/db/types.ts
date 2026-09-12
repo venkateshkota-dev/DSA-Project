@@ -7,6 +7,7 @@ export interface Movie {
   genre: string;
   duration: number; // in mins
   poster: string;
+  language?: string;
 }
 
 export interface Theatre {
@@ -37,4 +38,5 @@ export interface Booking {
   totalPrice: number;
   bookingHash: string; // HashMap key
   createdAt: Date;
+  language?: string;
 }

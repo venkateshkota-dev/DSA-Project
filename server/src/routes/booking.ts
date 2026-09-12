@@ -198,10 +198,13 @@ router.post('/book', async (req: Request, res: Response) => {
     const theatre = await db.getTheatre(showtime?.theatreId || '');
 
     const bookingHash = generateHash(8);
+    const movieTitle = movie?.title || '';
+    const movieLang = movie?.language || (movieTitle.toLowerCase().includes('ramayana') ? 'Hindi' : 'Telugu');
+
     const newBooking: Booking = {
       _id: `bk_${generateHash(6)}`,
       movieId: movie?._id || '',
-      movieTitle: movie?.title || '',
+      movieTitle,
       theatreId: theatre?._id || '',
       theatreName: theatre?.name || '',
       showtimeId,
@@ -209,7 +212,8 @@ router.post('/book', async (req: Request, res: Response) => {
       seats,
       totalPrice: (showtime?.price || 0) * seats.length,
       bookingHash,
-      createdAt: new Date()
+      createdAt: new Date(),
+      language: movieLang
     };
 
     // Save in DB store

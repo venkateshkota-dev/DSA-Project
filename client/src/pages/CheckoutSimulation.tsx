@@ -37,8 +37,8 @@ export default function CheckoutSimulation({
   onConfirmBooking
 }: CheckoutSimulationProps) {
   // Customer input states
-  const [userName, setUserName] = useState('Alex Morgan');
-  const [userEmail, setUserEmail] = useState('alex.morgan@example.com');
+  const [userName, setUserName] = useState('Venkatesh K');
+  const [userEmail, setUserEmail] = useState('cinebook@gmail.com');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking'>('upi');
 
   // Mutex & Concurrency States
@@ -237,7 +237,9 @@ export default function CheckoutSimulation({
                 <div>
                   <span className="text-[10px] text-teal-400 font-semibold uppercase tracking-widest">{movie.genre}</span>
                   <h3 className="text-2xl font-extrabold text-white tracking-wide mt-1">{movie.title}</h3>
-                  <p className="text-slate-400 text-xs mt-1 font-mono">{movie.duration} mins • English / Hindi</p>
+                  <p className="text-slate-400 text-xs mt-1 font-mono">
+                    {movie.duration} mins • Language: <strong className="text-gold-400">{movie.language || (movie.title.toLowerCase().includes('ramayana') ? 'Hindi' : 'Telugu')}</strong>
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-3 border-t border-cinema-border/50 text-xs">

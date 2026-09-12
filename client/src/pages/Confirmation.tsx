@@ -104,12 +104,18 @@ export default function Confirmation({
                 <span className="font-semibold text-slate-200">{booking.showtime}</span>
               </div>
               <div>
+                <span className="text-slate-500 block mb-0.5">Language</span>
+                <span className="font-bold text-gold-400 font-mono">
+                  {booking.language || (booking.movieTitle.toLowerCase().includes('ramayana') ? 'Hindi' : 'Telugu')}
+                </span>
+              </div>
+              <div>
                 <span className="text-slate-500 block mb-0.5">Seats Booked</span>
                 <span className="font-bold text-teal-400 font-mono tracking-wider">{booking.seats.join(', ')}</span>
               </div>
-              <div>
-                <span className="text-slate-500 block mb-0.5">Amount Paid</span>
-                <span className="font-extrabold text-white">₹{booking.totalPrice}</span>
+              <div className="col-span-2 pt-2 border-t border-cinema-border/50 flex justify-between items-center">
+                <span className="text-slate-500">Amount Paid:</span>
+                <span className="font-extrabold text-white text-sm">₹{booking.totalPrice}</span>
               </div>
             </div>
 
